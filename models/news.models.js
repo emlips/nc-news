@@ -30,7 +30,6 @@ exports.selectArticles = () => {
           article.comment_count = commentRef[article.article_id];
         }
       });
-      console.log(articles.rows);
       return articles.rows;
     }
   );
@@ -47,5 +46,22 @@ exports.selectArticleById = (id) => {
         });
       }
       return rows[0];
+    });
+};
+
+exports.selectCommentsByArticleId = (id) => {
+  return db
+    .query(
+      `SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at ASC`,
+      [id]
+    )
+    .then((result) => {
+      if (result.rowCount === 0) {
+        return Promise.reject({
+          status: 404,
+          msg: "article does not exist",
+        });
+      }
+      return result.rows;
     });
 };

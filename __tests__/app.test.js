@@ -3,6 +3,7 @@ const request = require("supertest");
 const db = require("../db/connection");
 const seed = require("../db/seeds/seed");
 const testData = require("../db/data/test-data/index");
+require("jest-sorted");
 
 beforeEach(() => seed(testData));
 afterAll(() => db.end());
@@ -40,8 +41,43 @@ describe("/api/topics", () => {
   });
 });
 
+describe("/api/articles", () => {
+  test("GET:200 responds with an array of article objects", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body }) => {
+        const { articles } = body;
+        expect(articles.length).toBe(13);
+        articles.forEach((article) => {
+          expect(typeof article.author).toBe("string");
+          expect(typeof article.title).toBe("string");
+          expect(typeof article.article_id).toBe("number");
+          expect(typeof article.topic).toBe("string");
+          expect(typeof article.created_at).toBe("string");
+          expect(typeof article.votes).toBe("number");
+          expect(typeof article.article_img_url).toBe("string");
+          expect(typeof article.comment_count).toBe("number");
+          if (article.article_id === 1) {
+            expect(article.comment_count).toBe(11);
+          }
+        });
+      });
+  });
+  test("GET:200 responds with articles in descending date order by default", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body }) => {
+        const { articles } = body;
+        expect(articles.length).toBe(13);
+        expect(articles).toBeSortedBy("created_at", { descending: true });
+      });
+  });
+});
+
 describe("/api/articles/:article_id", () => {
-  test("GET:200 response with an article object relating to the correct article_id", () => {
+  test("GET:200 responds with an article object relating to the correct article_id", () => {
     return request(app)
       .get("/api/articles/3")
       .expect(200)

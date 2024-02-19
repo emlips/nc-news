@@ -158,6 +158,45 @@ describe("/api/articles/:article_id/comments", () => {
         expect(body.msg).toBe("bad request");
       });
   });
+  test("POST:201 responds with the posted comment", () => {
+    const newPost = {
+      username: "rogersop",
+      body: "new comment posted",
+    };
+    return request(app)
+      .post("/api/articles/5/comments")
+      .send(newPost)
+      .expect(201)
+      .then(({ body }) => {
+        const { newComment } = body;
+        expect(newComment).toBe("new comment posted");
+      });
+  });
+  test("POST:400 responds with appropriate error message when body is malformed/missing required fields", () => {
+    const newPost = {
+      username: "rogersop",
+    };
+    return request(app)
+      .post("/api/articles/5/comments")
+      .send(newPost)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("bad request");
+      });
+  });
+  test("POST:400 responds with appropriate error message when username fails the scheme references validation", () => {
+    const newPost = {
+      username: "testUser",
+      body: "new comment posted",
+    };
+    return request(app)
+      .post("/api/articles/5/comments")
+      .send(newPost)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("bad request");
+      });
+  });
 });
 
 describe("path not found", () => {

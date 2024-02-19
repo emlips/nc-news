@@ -12,21 +12,17 @@ exports.selectTopics = () => {
 };
 
 exports.selectArticles = () => {
-  return db
-    .query("SELECT * FROM articles ORDER BY created_at DESC")
-    .then(({ rows }) => {
-      const articles = rows;
-      const commentCounts = db.query(
-        `SELECT article_id, COUNT(comment_id) FROM comments GROUP BY article_id`
-      );
-      return Promise.all([commentCounts, articles]);
-    })
-    .then(([{ rows }, articles]) => {
+  const articles = db.query("SELECT * FROM articles ORDER BY created_at DESC");
+  const commentCounts = db.query(
+    `SELECT article_id, COUNT(comment_id) FROM comments GROUP BY article_id`
+  );
+  return Promise.all([articles, commentCounts]).then(
+    ([articles, commentCounts]) => {
       const commentRef = {};
-      for (const row of rows) {
+      for (const row of commentCounts.rows) {
         commentRef[row.article_id] = Number(row.count);
       }
-      articles.forEach((article) => {
+      articles.rows.forEach((article) => {
         delete article.body;
         if (!commentRef[article.article_id]) {
           article.comment_count = 0;
@@ -34,8 +30,10 @@ exports.selectArticles = () => {
           article.comment_count = commentRef[article.article_id];
         }
       });
-      return articles;
-    });
+      console.log(articles.rows);
+      return articles.rows;
+    }
+  );
 };
 
 exports.selectArticleById = (id) => {

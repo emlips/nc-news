@@ -74,6 +74,20 @@ describe("/api/articles", () => {
         expect(articles).toBeSortedBy("created_at", { descending: true });
       });
   });
+  test("GET:200 responds with articles with comment_count properties", () => {
+    return request(app)
+    .get("/api/articles")
+    .expect(200)
+    .then(({body}) => {
+      const {articles} = body
+      articles.forEach((article) => {
+        expect(article).toHaveProperty("comment_count")
+        if(article.article_id === 1) {
+          expect(article.comment_count).toBe(11)
+        }
+      })
+    })
+  })
   test("GET:200 takes a topic query that returns only the articles on the given topic", () => {
     return request(app)
       .get("/api/articles?topic=mitch")

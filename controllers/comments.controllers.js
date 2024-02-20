@@ -6,11 +6,14 @@ const {
 
 exports.getCommentsByArticleId = (req, res, next) => {
   const { article_id } = req.params;
-  Promise.all([selectCommentsByArticleId(article_id), selectArticleById(article_id)])
-  .then((promiseResults) => {
-    res.status(200).send({ comments: promiseResults[0] });
-  })
-  .catch(next);
+  Promise.all([
+    selectCommentsByArticleId(article_id),
+    selectArticleById(article_id),
+  ])
+    .then((promiseResults) => {
+      res.status(200).send({ comments: promiseResults[0] });
+    })
+    .catch(next);
 };
 
 exports.postCommentByArticleId = (req, res, next) => {

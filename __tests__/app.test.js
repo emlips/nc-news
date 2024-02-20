@@ -144,13 +144,13 @@ describe("GET /api/articles/:article_id/comments", () => {
   });
   test("GET:200 responds with an empty array where the given article_id exists but has no associated comments", () => {
     return request(app)
-    .get("/api/articles/4/comments")
-    .expect(200)
-    .then(({body}) => {
-      const { comments } = body
-      expect(comments).toEqual([])
-    })
-  })
+      .get("/api/articles/4/comments")
+      .expect(200)
+      .then(({ body }) => {
+        const { comments } = body;
+        expect(comments).toEqual([]);
+      });
+  });
   test("GET:404 returns an error when a valid but non-existent id is received", () => {
     return request(app)
       .get("/api/articles/999999/comments")
@@ -167,9 +167,9 @@ describe("GET /api/articles/:article_id/comments", () => {
         expect(body.msg).toBe("bad request");
       });
   });
-})
+});
 
-describe.only("POST /api/articles/:article_id/comments", () => {
+describe("POST /api/articles/:article_id/comments", () => {
   test("POST:201 responds with the posted comment", () => {
     const newPost = {
       username: "rogersop",
@@ -184,7 +184,7 @@ describe.only("POST /api/articles/:article_id/comments", () => {
         expect(newComment).toBe("new comment posted");
       });
   });
-  test("POST:400 responds with appropriate error message when body is malformed/missing required fields", () => {
+  test("POST:400 returns an error when body is malformed/missing required fields", () => {
     const newPost = {
       username: "rogersop",
     };
@@ -196,7 +196,7 @@ describe.only("POST /api/articles/:article_id/comments", () => {
         expect(body.msg).toBe("bad request");
       });
   });
-  test("POST:400 responds with appropriate error message when username fails the schema references validation", () => {
+  test("POST:400 returns an error message when username fails the schema references validation", () => {
     const newPost = {
       username: "testUser",
       body: "new comment posted",
@@ -230,6 +230,65 @@ describe.only("POST /api/articles/:article_id/comments", () => {
     return request(app)
       .post("/api/articles/notAnId/comments")
       .send(newPost)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("bad request");
+      });
+  });
+});
+
+describe("PATCH /api/articles/:article_id", () => {
+  test("PATCH:200 responds with the updated article", () => {
+    const update = { inc_votes: 10 };
+    return request(app)
+      .patch("/api/articles/1")
+      .send(update)
+      .expect(200)
+      .then(({ body }) => {
+        const { article } = body;
+        expect(article.votes).toBe(110);
+        expect(typeof article.author).toBe("string");
+        expect(typeof article.title).toBe("string");
+        expect(typeof article.article_id).toBe("number");
+        expect(typeof article.topic).toBe("string");
+        expect(typeof article.created_at).toBe("string");
+        expect(typeof article.article_img_url).toBe("string");
+      });
+  });
+  test("PATCH:400 returns an error when body is malformed/missing required fields", () => {
+    return request(app)
+      .patch("/api/articles/1")
+      .send({})
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("bad request");
+      });
+  });
+  test("PATCH:400 returns an error when inc_votes is of invalid type", () => {
+    const update = { inc_votes: "a string" };
+    return request(app)
+      .patch("/api/articles/1")
+      .send(update)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("bad request");
+      });
+  });
+  test("PATCH:404 returns an error when request body is valid, but a valid but non-existent article_id is received", () => {
+    const update = { inc_votes: 1 };
+    return request(app)
+      .patch("/api/articles/99999")
+      .send(update)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("article does not exist");
+      });
+  });
+  test("PATCH:400 returns an error when request body is valid, but an invalid article_id is received", () => {
+    const update = { inc_votes: 1 };
+    return request(app)
+      .patch("/api/articles/notAnId")
+      .send(update)
       .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("bad request");

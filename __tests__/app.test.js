@@ -76,18 +76,18 @@ describe("/api/articles", () => {
   });
   test("GET:200 responds with articles with comment_count properties", () => {
     return request(app)
-    .get("/api/articles")
-    .expect(200)
-    .then(({body}) => {
-      const {articles} = body
-      articles.forEach((article) => {
-        expect(article).toHaveProperty("comment_count")
-        if(article.article_id === 1) {
-          expect(article.comment_count).toBe(11)
-        }
-      })
-    })
-  })
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body }) => {
+        const { articles } = body;
+        articles.forEach((article) => {
+          expect(article).toHaveProperty("comment_count");
+          if (article.article_id === 1) {
+            expect(article.comment_count).toBe(11);
+          }
+        });
+      });
+  });
   test("GET:200 takes a topic query that returns only the articles on the given topic", () => {
     return request(app)
       .get("/api/articles?topic=mitch")
@@ -137,6 +137,26 @@ describe("/api/articles/:article_id", () => {
             "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
           votes: 0,
         });
+      });
+  });
+  test("GET:200 responds with an article with comment_count property", () => {
+    return request(app)
+      .get("/api/articles/1")
+      .expect(200)
+      .then(({ body }) => {
+        const { article } = body;
+        expect(article).toHaveProperty("comment_count");
+        expect(article.comment_count).toBe(11);
+      });
+  });
+  test("GET:200 responds with an article with comment_count property with value 0 when no comments are associated with the article", () => {
+    return request(app)
+      .get("/api/articles/2")
+      .expect(200)
+      .then(({ body }) => {
+        const { article } = body;
+        expect(article).toHaveProperty("comment_count");
+        expect(article.comment_count).toBe(0);
       });
   });
   test("GET:404 returns an error when a valid but non-existent id is received", () => {

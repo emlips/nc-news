@@ -49,17 +49,26 @@ exports.selectArticles = (topic) => {
 };
 
 exports.selectArticleById = (id) => {
-  return db
-    .query(`SELECT * FROM articles WHERE article_id = $1`, [id])
-    .then(({ rows }) => {
-      if (!rows[0]) {
+  const article = db.query(`SELECT * FROM articles WHERE article_id = $1`, [
+    id,
+  ]);
+  const commentCount = db.query(
+    `SELECT COUNT(comment_id) FROM comments WHERE article_id = $1`,
+    [id]
+  );
+  return Promise.all([article, commentCount]).then(
+    ([articleResult, commentCountResult]) => {
+      if (!articleResult.rows[0]) {
         return Promise.reject({
           status: 404,
           msg: "article does not exist",
         });
       }
-      return rows[0];
-    });
+      const article = articleResult.rows[0];
+      article.comment_count = Number(commentCountResult.rows[0].count);
+      return article;
+    }
+  );
 };
 
 exports.updateArticleById = (id, votesUpdate, votes) => {

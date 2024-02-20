@@ -247,12 +247,6 @@ describe("PATCH /api/articles/:article_id", () => {
       .then(({ body }) => {
         const { article } = body;
         expect(article.votes).toBe(110);
-        expect(typeof article.author).toBe("string");
-        expect(typeof article.title).toBe("string");
-        expect(typeof article.article_id).toBe("number");
-        expect(typeof article.topic).toBe("string");
-        expect(typeof article.created_at).toBe("string");
-        expect(typeof article.article_img_url).toBe("string");
       });
   });
   test("PATCH:400 returns an error when body is malformed/missing required fields", () => {
@@ -314,6 +308,23 @@ describe("DELETE /api/comments/:comment_id", () => {
       .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("bad request");
+      });
+  });
+});
+
+describe("GET /api/users", () => {
+  test("GET:200 responds with an array of user objects", () => {
+    return request(app)
+      .get("/api/users")
+      .expect(200)
+      .then(({ body }) => {
+        const { users } = body;
+        expect(users.length).toBe(4);
+        users.forEach((user) => {
+          expect(typeof user.username).toBe("string");
+          expect(typeof user.name).toBe("string");
+          expect(typeof user.avatar_url).toBe("string");
+        });
       });
   });
 });

@@ -96,7 +96,7 @@ describe("/api/articles/:article_id", () => {
         });
       });
   });
-  test("GET:404 responds with appropriate error message when a valid but non-existent id is received", () => {
+  test("GET:404 returns an error when a valid but non-existent id is received", () => {
     return request(app)
       .get("/api/articles/999999")
       .expect(404)
@@ -104,7 +104,7 @@ describe("/api/articles/:article_id", () => {
         expect(body.msg).toBe("article does not exist");
       });
   });
-  test("GET:400 responds with appropriate error message when an invalid id is received", () => {
+  test("GET:400 returns an error when an invalid id is received", () => {
     return request(app)
       .get("/api/articles/notAnId")
       .expect(400)
@@ -132,7 +132,7 @@ describe("/api/articles/:article_id/comments", () => {
         });
       });
   });
-  test("GET:200 responds with comments ordered with most recent first", () => {
+  test("GET:200 responds with comments ordered by most recent first", () => {
     return request(app)
       .get("/api/articles/1/comments")
       .expect(200)
@@ -184,7 +184,7 @@ describe("/api/articles/:article_id/comments", () => {
         expect(body.msg).toBe("bad request");
       });
   });
-  test("POST:400 responds with appropriate error message when username fails the scheme references validation", () => {
+  test("POST:400 responds with appropriate error message when username fails the schema references validation", () => {
     const newPost = {
       username: "testUser",
       body: "new comment posted",

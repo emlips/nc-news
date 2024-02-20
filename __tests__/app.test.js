@@ -114,7 +114,7 @@ describe("/api/articles/:article_id", () => {
   });
 });
 
-describe("/api/articles/:article_id/comments", () => {
+describe("GET /api/articles/:article_id/comments", () => {
   test("GET:200 responds with an array of comments relating to the given article_id", () => {
     return request(app)
       .get("/api/articles/1/comments")
@@ -167,6 +167,9 @@ describe("/api/articles/:article_id/comments", () => {
         expect(body.msg).toBe("bad request");
       });
   });
+})
+
+describe.only("POST /api/articles/:article_id/comments", () => {
   test("POST:201 responds with the posted comment", () => {
     const newPost = {
       username: "rogersop",
@@ -200,6 +203,32 @@ describe("/api/articles/:article_id/comments", () => {
     };
     return request(app)
       .post("/api/articles/5/comments")
+      .send(newPost)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("bad request");
+      });
+  });
+  test("POST:400 returns an error when request body is valid, but a valid but non-existent article_id is received", () => {
+    const newPost = {
+      username: "rogersop",
+      body: "new comment posted",
+    };
+    return request(app)
+      .post("/api/articles/999999/comments")
+      .send(newPost)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("bad request");
+      });
+  });
+  test("POST:400 returns an error when request body is valid, but an invalid id is received", () => {
+    const newPost = {
+      username: "rogersop",
+      body: "new comment posted",
+    };
+    return request(app)
+      .post("/api/articles/notAnId/comments")
       .send(newPost)
       .expect(400)
       .then(({ body }) => {

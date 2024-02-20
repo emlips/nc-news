@@ -1,12 +1,35 @@
 const db = require("../db/connection");
 
-exports.selectArticles = () => {
-  const articles = db.query("SELECT * FROM articles ORDER BY created_at DESC");
+exports.selectArticles = (topic) => {
+  const queryValues = [];
+  let articlesQuery = `SELECT * FROM articles`;
+
+  if (topic) {
+    articlesQuery += ` WHERE topic = $1`;
+    queryValues.push(topic);
+  }
+
+  articlesQuery += ` ORDER BY created_at DESC`;
+
+  const articles = db.query(articlesQuery, queryValues);
   const commentCounts = db.query(
     `SELECT article_id, COUNT(comment_id) FROM comments GROUP BY article_id`
   );
-  return Promise.all([articles, commentCounts]).then(
-    ([articles, commentCounts]) => {
+  const topicCheck = db.query(`SELECT slug FROM topics WHERE slug = $1`, [
+    topic,
+  ]);
+
+  return Promise.all([articles, commentCounts, topicCheck]).then(
+    ([articles, commentCounts, topics]) => {
+      if (topic) {
+        if (!topics.rows[0]) {
+          return Promise.reject({
+            status: 404,
+            msg: "topic not found",
+          });
+        }
+      }
+
       const commentRef = {};
       for (const row of commentCounts.rows) {
         commentRef[row.article_id] = Number(row.count);
@@ -19,6 +42,7 @@ exports.selectArticles = () => {
           article.comment_count = commentRef[article.article_id];
         }
       });
+
       return articles.rows;
     }
   );

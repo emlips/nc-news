@@ -6,8 +6,8 @@ exports.selectCommentsByArticleId = (id) => {
       `SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at ASC`,
       [id]
     )
-    .then((result) => {
-      return result.rows;
+    .then(({ rows }) => {
+      return rows;
     });
 };
 

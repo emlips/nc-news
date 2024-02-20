@@ -142,7 +142,16 @@ describe("/api/articles/:article_id/comments", () => {
         expect(comments).toBeSortedBy("created_at");
       });
   });
-  test("GET:404 responds with appropriate error message when a valid but non-existent id is received", () => {
+  test("GET:200 responds with an empty array where the given article_id exists but has no associated comments", () => {
+    return request(app)
+    .get("/api/articles/4/comments")
+    .expect(200)
+    .then(({body}) => {
+      const { comments } = body
+      expect(comments).toEqual([])
+    })
+  })
+  test("GET:404 returns an error when a valid but non-existent id is received", () => {
     return request(app)
       .get("/api/articles/999999/comments")
       .expect(404)
@@ -150,7 +159,7 @@ describe("/api/articles/:article_id/comments", () => {
         expect(body.msg).toBe("article does not exist");
       });
   });
-  test("GET:400 responds with appropriate error message when an invalid id is received", () => {
+  test("GET:400 returns an error when an invalid id is received", () => {
     return request(app)
       .get("/api/articles/notAnId/comments")
       .expect(400)

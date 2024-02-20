@@ -15,7 +15,6 @@ const { getUsers } = require("./controllers/users.controllers");
 const {
   handleInvalidEndpoint,
   handleCustomErrors,
-  hanglePSQLErrors,
   handlePSQLErrors,
 } = require("./controllers/errors.controllers");
 

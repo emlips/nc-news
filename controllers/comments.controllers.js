@@ -1,3 +1,4 @@
+const { selectArticleById } = require("../models/articles.models");
 const {
   selectCommentsByArticleId,
   insertCommentByArticleId,
@@ -5,11 +6,11 @@ const {
 
 exports.getCommentsByArticleId = (req, res, next) => {
   const { article_id } = req.params;
-  selectCommentsByArticleId(article_id)
-    .then((comments) => {
-      res.status(200).send({ comments });
-    })
-    .catch(next);
+  Promise.all([selectCommentsByArticleId(article_id), selectArticleById(article_id)])
+  .then((promiseResults) => {
+    res.status(200).send({ comments: promiseResults[0] });
+  })
+  .catch(next);
 };
 
 exports.postCommentByArticleId = (req, res, next) => {

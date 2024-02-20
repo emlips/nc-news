@@ -7,12 +7,6 @@ exports.selectCommentsByArticleId = (id) => {
         [id]
       )
       .then((result) => {
-        if (result.rowCount === 0) {
-          return Promise.reject({
-            status: 404,
-            msg: "article does not exist",
-          });
-        }
         return result.rows;
       });
   };

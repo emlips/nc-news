@@ -1,16 +1,25 @@
 const db = require("../db/connection");
 const { createCommentRef } = require("../utils");
 
-exports.selectArticles = (topic) => {
+exports.selectArticles = (topic, sort_by = "created_at", order = "desc") => {
   const queryValues = [];
   let articlesQuery = `SELECT * FROM articles`;
+  const validSortBy = ["article_id", "title", "author", "created_at", "votes"];
+  const validOrder = ["asc", "desc"];
+
+  if (!validSortBy.includes(sort_by) || !validOrder.includes(order)) {
+    return Promise.reject({
+      status: 400,
+      msg: "bad request",
+    });
+  }
 
   if (topic) {
     articlesQuery += ` WHERE topic = $1`;
     queryValues.push(topic);
   }
 
-  articlesQuery += ` ORDER BY created_at DESC`;
+  articlesQuery += ` ORDER BY ${sort_by} ${order}`;
 
   const articles = db.query(articlesQuery, queryValues);
   const topicCheck = db.query(`SELECT slug FROM topics WHERE slug = $1`, [

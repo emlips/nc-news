@@ -4,7 +4,7 @@ const db = require("../db/connection");
 const seed = require("../db/seeds/seed");
 const testData = require("../db/data/test-data/index");
 require("jest-sorted");
-const { createCommentRef } = require("../utils")
+const { createCommentRef } = require("../utils");
 
 beforeEach(() => seed(testData));
 afterAll(() => db.end());
@@ -116,6 +116,50 @@ describe("/api/articles", () => {
       .expect(404)
       .then(({ body }) => {
         expect(body.msg).toBe("topic not found");
+      });
+  });
+  test("GET:200 responds with articles sorted by the given column when a sort_by query is received, with default order descending", () => {
+    return request(app)
+      .get("/api/articles?sort_by=title")
+      .expect(200)
+      .then(({ body }) => {
+        const { articles } = body;
+        expect(articles.length).toBe(13);
+        expect(articles).toBeSortedBy("title", { descending: true });
+      });
+  });
+  test("GET:400 returns an error when a non-existent sort_by value is received", () => {
+    return request(app)
+      .get("/api/articles?sort_by=word_count")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("bad request");
+      });
+  });
+  test("GET:400 returns an error when the sort_by value is not strictly a column name, to avoid SQL injection", () => {
+    return request(app)
+      .get("/api/articles?sort_by=author;")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("bad request");
+      });
+  });
+  test("GET:200 responds with articles sorted in ascending order of the given sort_by value, when an order=asc query is chained", () => {
+    return request(app)
+      .get("/api/articles?sort_by=title&order=asc")
+      .expect(200)
+      .then(({ body }) => {
+        const { articles } = body;
+        expect(articles.length).toBe(13);
+        expect(articles).toBeSortedBy("title");
+      });
+  });
+  test("GET:400 returns an error when the given order value is not asc or desc", () => {
+    return request(app)
+      .get("/api/articles?sort_by=title&order=notAsc")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("bad request");
       });
   });
 });

@@ -4,6 +4,7 @@ const db = require("../db/connection");
 const seed = require("../db/seeds/seed");
 const testData = require("../db/data/test-data/index");
 require("jest-sorted");
+const { createCommentRef } = require("../utils")
 
 beforeEach(() => seed(testData));
 afterAll(() => db.end());

@@ -4,6 +4,7 @@ const db = require("../db/connection");
 const seed = require("../db/seeds/seed");
 const testData = require("../db/data/test-data/index");
 require("jest-sorted");
+const { createCommentRef } = require("../utils")
 
 beforeEach(() => seed(testData));
 afterAll(() => db.end());
@@ -400,5 +401,28 @@ describe("path not found", () => {
       .then(({ body }) => {
         expect(body.msg).toBe("path not found");
       });
+  });
+});
+
+describe("createCommentRef", () => {
+  test("returns a reference object with keys of article_ids, and properties of comment_counts", () => {
+    const output = createCommentRef();
+    return output.then((result) => {
+      expect(result).toMatchObject({
+        1: 11,
+        2: 0,
+        3: 2,
+        4: 0,
+        5: 2,
+        6: 1,
+        7: 0,
+        8: 0,
+        9: 2,
+        10: 0,
+        11: 0,
+        12: 0,
+        13: 0,
+      });
+    });
   });
 });

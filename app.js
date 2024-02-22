@@ -10,8 +10,12 @@ const {
   getCommentsByArticleId,
   postCommentByArticleId,
   deleteCommentById,
+  patchCommentByCommentId,
 } = require("./controllers/comments.controllers");
-const { getUsers, getUserByUsername } = require("./controllers/users.controllers");
+const {
+  getUsers,
+  getUserByUsername,
+} = require("./controllers/users.controllers");
 const {
   handleInvalidEndpoint,
   handleCustomErrors,
@@ -31,9 +35,10 @@ app.patch("/api/articles/:article_id", patchArticleById);
 
 app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
 app.post("/api/articles/:article_id/comments", postCommentByArticleId);
+app.patch("/api/comments/:comment_id", patchCommentByCommentId);
 
 app.get("/api/users", getUsers);
-app.get("/api/users/:username", getUserByUsername)
+app.get("/api/users/:username", getUserByUsername);
 
 app.delete("/api/comments/:comment_id", deleteCommentById);
 

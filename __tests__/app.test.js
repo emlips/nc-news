@@ -419,6 +419,62 @@ describe("DELETE /api/comments/:comment_id", () => {
   });
 });
 
+describe.only("PATCH /api/comments/:comment_id", () => {
+  test("PATCH:200 responds with the updated comment", () => {
+    return request(app)
+      .patch("/api/comments/2")
+      .send({ inc_votes: 1 })
+      .expect(200)
+      .then(({ body }) => {
+        const { comment } = body;
+        expect(comment.comment_id).toBe(2);
+        expect(comment.votes).toBe(15);
+        expect(comment.body).toBe(
+          "The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky."
+        );
+        expect(comment.author).toBe("butter_bridge");
+        expect(comment.article_id).toBe(1);
+        expect(comment.created_at).toEqual(expect.any(String));
+      });
+  });
+  test("PATCH:400 returns an error when body is malformed/missing required fields", () => {
+    return request(app)
+      .patch("/api/comments/2")
+      .send({ votes: 3 })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("bad request");
+      });
+  });
+  test("PATCH:400 returns an error when inc_votes is of invalid type", () => {
+    return request(app)
+      .patch("/api/comments/2")
+      .send({ inc_votes: "notANumber" })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("bad request");
+      });
+  });
+  test("PATCH:404 returns an error when request body is valid, but a valid but non-existent comment_id is received", () => {
+    return request(app)
+      .patch("/api/comments/999999")
+      .send({ inc_votes: 1 })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("comment does not exist");
+      });
+  });
+  test("PATCH:400 returns an error when request body is valid, but an invalid comment_id is received", () => {
+    return request(app)
+      .patch("/api/comments/notAnId")
+      .send({ inc_votes: 1 })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("bad request");
+      });
+  });
+});
+
 describe("GET /api/users", () => {
   test("GET:200 responds with an array of user objects", () => {
     return request(app)

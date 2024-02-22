@@ -113,5 +113,17 @@
         }
       ]
     }
+  },
+  "GET /api/users/:username": {
+    "description": "serves a user object relating to the username",
+    "queries": [],
+    "reqBodyFormat": "object",
+    "exampleResponse": {
+      "user": {
+        "username": "lurker",
+        "name": "do_nothing",
+        "avatar_url": "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png"
+      }
+    }
   }
 }

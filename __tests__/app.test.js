@@ -436,6 +436,31 @@ describe("GET /api/users", () => {
   });
 });
 
+describe("GET /api/users/:username", () => {
+  test("GET:200 responds with a user object relating to the correct username", () => {
+    return request(app)
+      .get("/api/users/lurker")
+      .expect(200)
+      .then(({ body }) => {
+        const { user } = body;
+        expect(user).toMatchObject({
+          username: "lurker",
+          name: "do_nothing",
+          avatar_url:
+            "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png",
+        });
+      });
+  });
+  test("GET:404 returns an error when a valid but non-existent username is received", () => {
+    return request(app)
+      .get("/api/users/doesNotExist")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("user does not exist");
+      });
+  });
+});
+
 describe("path not found", () => {
   test("GET:404 path not found", () => {
     return request(app)

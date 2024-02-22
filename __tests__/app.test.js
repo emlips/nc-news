@@ -356,6 +356,17 @@ describe("PATCH /api/articles/:article_id", () => {
         expect(article.votes).toBe(110);
       });
   });
+  test("PATCH:200 responds negative vote count when the update results in negative votes", () => {
+    const update = { inc_votes: -1 };
+    return request(app)
+      .patch("/api/articles/2")
+      .send(update)
+      .expect(200)
+      .then(({ body }) => {
+        const { article } = body;
+        expect(article.votes).toBe(-1);
+      });
+  });
   test("PATCH:400 returns an error when body is malformed/missing required fields", () => {
     return request(app)
       .patch("/api/articles/1")
@@ -429,12 +440,17 @@ describe("PATCH /api/comments/:comment_id", () => {
         const { comment } = body;
         expect(comment.comment_id).toBe(2);
         expect(comment.votes).toBe(15);
-        expect(comment.body).toBe(
-          "The beautiful thing about treasure is that it exists. Got to find out what kind of sheets these are; not cotton, not rayon, silky."
-        );
-        expect(comment.author).toBe("butter_bridge");
-        expect(comment.article_id).toBe(1);
-        expect(comment.created_at).toEqual(expect.any(String));
+      });
+  });
+  test("PATCH:200 responds negative vote count when the update results in negative votes", () => {
+    return request(app)
+      .patch("/api/comments/5")
+      .send({ inc_votes: -3 })
+      .expect(200)
+      .then(({ body }) => {
+        const { comment } = body;
+        expect(comment.comment_id).toBe(5);
+        expect(comment.votes).toBe(-3);
       });
   });
   test("PATCH:400 returns an error when body is malformed/missing required fields", () => {

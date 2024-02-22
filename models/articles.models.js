@@ -55,14 +55,19 @@ exports.selectArticleById = (id) => {
     });
 };
 
-exports.updateArticleById = (id, votesUpdate, votes) => {
-  votes += votesUpdate;
+exports.updateArticleById = (id, voteChange) => {
   return db
-    .query(`UPDATE articles SET votes = $1 WHERE article_id = $2 RETURNING *`, [
-      votes,
-      id,
-    ])
+    .query(
+      `UPDATE articles SET votes = votes + $1 WHERE article_id = $2 RETURNING *`,
+      [voteChange, id]
+    )
     .then(({ rows }) => {
+      if (!rows[0]) {
+        return Promise.reject({
+          status: 404,
+          msg: "article does not exist",
+        });
+      }
       return rows[0];
     });
 };

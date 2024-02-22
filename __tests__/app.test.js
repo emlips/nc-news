@@ -356,6 +356,17 @@ describe("PATCH /api/articles/:article_id", () => {
         expect(article.votes).toBe(110);
       });
   });
+  test("PATCH:200 responds negative vote count when the update results in negative votes", () => {
+    const update = { inc_votes: -1 };
+    return request(app)
+      .patch("/api/articles/2")
+      .send(update)
+      .expect(200)
+      .then(({ body }) => {
+        const { article } = body;
+        expect(article.votes).toBe(-1);
+      });
+  });
   test("PATCH:400 returns an error when body is malformed/missing required fields", () => {
     return request(app)
       .patch("/api/articles/1")
@@ -412,6 +423,67 @@ describe("DELETE /api/comments/:comment_id", () => {
   test("DELETE:400 returns an error when an invalid comment_id is received", () => {
     return request(app)
       .delete("/api/comments/notAnId")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("bad request");
+      });
+  });
+});
+
+describe("PATCH /api/comments/:comment_id", () => {
+  test("PATCH:200 responds with the updated comment", () => {
+    return request(app)
+      .patch("/api/comments/2")
+      .send({ inc_votes: 1 })
+      .expect(200)
+      .then(({ body }) => {
+        const { comment } = body;
+        expect(comment.comment_id).toBe(2);
+        expect(comment.votes).toBe(15);
+      });
+  });
+  test("PATCH:200 responds negative vote count when the update results in negative votes", () => {
+    return request(app)
+      .patch("/api/comments/5")
+      .send({ inc_votes: -3 })
+      .expect(200)
+      .then(({ body }) => {
+        const { comment } = body;
+        expect(comment.comment_id).toBe(5);
+        expect(comment.votes).toBe(-3);
+      });
+  });
+  test("PATCH:400 returns an error when body is malformed/missing required fields", () => {
+    return request(app)
+      .patch("/api/comments/2")
+      .send({ votes: 3 })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("bad request");
+      });
+  });
+  test("PATCH:400 returns an error when inc_votes is of invalid type", () => {
+    return request(app)
+      .patch("/api/comments/2")
+      .send({ inc_votes: "notANumber" })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("bad request");
+      });
+  });
+  test("PATCH:404 returns an error when request body is valid, but a valid but non-existent comment_id is received", () => {
+    return request(app)
+      .patch("/api/comments/999999")
+      .send({ inc_votes: 1 })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("comment does not exist");
+      });
+  });
+  test("PATCH:400 returns an error when request body is valid, but an invalid comment_id is received", () => {
+    return request(app)
+      .patch("/api/comments/notAnId")
+      .send({ inc_votes: 1 })
       .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("bad request");

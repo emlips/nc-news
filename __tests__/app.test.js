@@ -419,7 +419,7 @@ describe("DELETE /api/comments/:comment_id", () => {
   });
 });
 
-describe.only("PATCH /api/comments/:comment_id", () => {
+describe("PATCH /api/comments/:comment_id", () => {
   test("PATCH:200 responds with the updated comment", () => {
     return request(app)
       .patch("/api/comments/2")

@@ -1,0 +1,44 @@
+name: Test & Deploy
+on:
+  push:
+    branches:
+      - main
+jobs:
+  test-utils:
+    name: test-utils
+    runs-on: ubuntu-latest
+    steps:
+      - name: clone repo and checkout main
+        uses: actions/checkout@v4
+      - name: install dependencies
+        run: npm install
+      - name: run tests
+        run: npm run test utils.js
+  test-app:
+    name: test-app
+    needs: test-utils
+    runs-on: ubuntu-latest
+    steps:
+      - name: clone repo and checkout main
+        uses: actions/checkout@v4
+      - name: install dependencies
+        run: npm install
+      - name: setup psql
+        uses: harmon758/postgresql-action@v1
+        with:
+          postgresql db: test_database
+          postgresql password: password
+          postgresql user: test_user
+      - name: run tests
+        run: PGDATABASE=test_database PGUSER=test_user PGPASSWORD=password npm run test app.js
+  test-with-live-db:
+    name: test-live-db
+    needs: test-app
+    runs-on: ubuntu-latest
+    steps:
+      - name: clone rep and checkout main
+        uses: actions/checkout@v4
+      - name: install dependencies
+        uses: npm install
+      - name: run tests
+        run: NODE_ENV=production DATABASE_URL=${{ secrets.DATABASE_URL }} npm run test app.js

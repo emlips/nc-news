@@ -38,6 +38,27 @@ exports.selectArticles = (topic, sort_by = "created_at", order = "desc") => {
   });
 };
 
+exports.insertArticle = (
+  author,
+  title,
+  body,
+  topic,
+  article_img_url = "https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700"
+) => {
+  return db
+    .query(
+      `INSERT INTO articles
+  (author, title, body, topic, article_img_url)
+  VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [author, title, body, topic, article_img_url]
+    )
+    .then(({ rows }) => {
+      const article = rows[0];
+      article.comment_count = 0;
+      return article;
+    });
+};
+
 exports.selectArticleById = (id) => {
   return db
     .query(
@@ -72,23 +93,27 @@ exports.updateArticleById = (id, voteChange) => {
     });
 };
 
-exports.insertArticle = (
-  author,
-  title,
-  body,
-  topic,
-  article_img_url = "https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700"
-) => {
+exports.selectCommentsByArticleId = (id) => {
   return db
     .query(
-      `INSERT INTO articles
-  (author, title, body, topic, article_img_url)
-  VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [author, title, body, topic, article_img_url]
+      `SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at ASC`,
+      [id]
     )
     .then(({ rows }) => {
-      const article = rows[0];
-      article.comment_count = 0;
-      return article;
+      return rows;
+    });
+};
+
+exports.insertCommentByArticleId = (id, username, body) => {
+  return db
+    .query(
+      `INSERT INTO comments 
+      (body, article_id, author)
+      VALUES
+      ($1, $2, $3) RETURNING *`,
+      [body, id, username]
+    )
+    .then(({ rows }) => {
+      return rows[0].body;
     });
 };

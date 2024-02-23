@@ -1,4 +1,4 @@
-const { selectEndpoints } = require("../models/endpoints.models");
+const { selectEndpoints } = require("../models/api.models");
 
 exports.getEndpoints = (req, res, next) => {
   Promise.all([selectEndpoints()]).then((result) => {

@@ -41,4 +41,4 @@ jobs:
       - name: install dependencies
         run: npm install
       - name: run tests
-        run: NODE_ENV=production DATABASE_URL=${{ secrets.DATABASE_URL }} npm run test app.js
+        run: NODE_ENV=production DATABASE_URL=${{ secrets.DATABASE_URL }} npm run test-app

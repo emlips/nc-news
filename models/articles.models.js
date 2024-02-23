@@ -103,6 +103,10 @@ exports.updateArticleById = (id, voteChange) => {
     });
 };
 
+exports.removeArticleById = (id) => {
+  return db.query(`DELETE FROM articles WHERE article_id = $1`, [id]);
+};
+
 exports.selectCommentsByArticleId = (id, limit = 10, p = 1) => {
   return db
     .query(

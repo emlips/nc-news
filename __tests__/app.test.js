@@ -8,7 +8,7 @@ require("jest-sorted");
 beforeEach(() => seed(testData));
 afterAll(() => db.end());
 
-describe("/api", () => {
+describe("GET /api", () => {
   test("GET:200 responds with an object describing all available endpoints", () => {
     return request(app)
       .get("/api")
@@ -25,7 +25,7 @@ describe("/api", () => {
   });
 });
 
-describe("/api/topics", () => {
+describe("GET /api/topics", () => {
   test("GET:200 responds with an array of topic objects", () => {
     return request(app)
       .get("/api/topics")
@@ -41,7 +41,7 @@ describe("/api/topics", () => {
   });
 });
 
-describe("/api/articles", () => {
+describe("GET /api/articles", () => {
   test("GET:200 responds with an array of article objects", () => {
     return request(app)
       .get("/api/articles")
@@ -163,7 +163,99 @@ describe("/api/articles", () => {
   });
 });
 
-describe("/api/articles/:article_id", () => {
+describe("POST /api/articles", () => {
+  test("POST:201 responds with newly posted article", () => {
+    const newArticle = {
+      author: "lurker",
+      title: "newTitle",
+      body: "newBody",
+      topic: "cats",
+      article_img_url: "newURL",
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(newArticle)
+      .expect(201)
+      .then(({ body }) => {
+        const { article } = body;
+        expect(article).toMatchObject({
+          author: "lurker",
+          title: "newTitle",
+          body: "newBody",
+          topic: "cats",
+          article_img_url: "newURL",
+          article_id: expect.any(Number),
+          votes: expect.any(Number),
+          created_at: expect.any(String),
+          comment_count: expect.any(Number),
+        });
+      });
+  });
+  test("POST:201 responds with newly created article with default article_img_url when no value is received in the request", () => {
+    const newArticle = {
+      author: "lurker",
+      title: "newTitle",
+      body: "newBody",
+      topic: "cats",
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(newArticle)
+      .expect(201)
+      .then(({ body }) => {
+        const { article } = body;
+        expect(article.article_img_url).toBe(
+          "https://images.pexels.com/photos/97050/pexels-photo-97050.jpeg?w=700&h=700"
+        );
+      });
+  });
+  test("POST:400 returns an error message when topic fails the schema topic reference validation", () => {
+    const newArticle = {
+      author: "lurker",
+      title: "newTitle",
+      body: "newBody",
+      topic: "dogs",
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(newArticle)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("bad request");
+      });
+  });
+  test("POST:400 returns an error message when author fails the schema username reference validation", () => {
+    const newArticle = {
+      author: "newAuthor",
+      title: "newTitle",
+      body: "newBody",
+      topic: "cats",
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(newArticle)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("bad request");
+      });
+  });
+  test("POST:400 returns an error when body is malformed/missing required fields", () => {
+    const newArticle = {
+      author: "lurker",
+      title: "newTitle",
+      body: "newBody",
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(newArticle)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("bad request");
+      });
+  });
+});
+
+describe("GET /api/articles/:article_id", () => {
   test("GET:200 responds with an article object relating to the correct article_id", () => {
     return request(app)
       .get("/api/articles/3")

@@ -1,6 +1,6 @@
 name: Test & Deploy
 on:
-  push:
+  pull_request:
     branches:
       - main
 jobs:
@@ -13,7 +13,7 @@ jobs:
       - name: install dependencies
         run: npm install
       - name: run tests
-        run: npm run test utils.js
+        run: npm run test-utils
   test-app:
     name: test-app
     needs: test-utils
@@ -30,7 +30,7 @@ jobs:
           postgresql password: password
           postgresql user: test_user
       - name: run tests
-        run: PGDATABASE=test_database PGUSER=test_user PGPASSWORD=password npm run test app.js
+        run: PGDATABASE=test_database PGUSER=test_user PGPASSWORD=password npm run test-app
   test-with-live-db:
     name: test-live-db
     needs: test-app

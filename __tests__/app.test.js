@@ -40,6 +40,48 @@ describe("GET /api/topics", () => {
       });
   });
 });
+describe("POST /api/topics", () => {
+  test("POST:201 responds with newly post topic object", () => {
+    const newTopic = {
+      slug: "newTopic",
+      description: "newDescription",
+    };
+    return request(app)
+      .post("/api/topics")
+      .send(newTopic)
+      .expect(201)
+      .then(({ body }) => {
+        const { topic } = body;
+        expect(topic).toMatchObject(newTopic);
+      });
+  });
+  test("POST:201 accepts request body without description property", () => {
+    const newTopic = {
+      slug: "newTopic",
+    };
+    return request(app)
+      .post("/api/topics")
+      .send(newTopic)
+      .expect(201)
+      .then(({ body }) => {
+        const { topic } = body;
+        expect(topic.slug).toBe("newTopic");
+        expect(topic.description).toBe(null);
+      });
+  });
+  test("POST:400 returns an error when body is malformed/missing required slug field", () => {
+    const newTopic = {
+      description: "newDescription",
+    };
+    return request(app)
+      .post("/api/topics")
+      .send(newTopic)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("bad request");
+      });
+  });
+});
 
 describe("GET /api/articles", () => {
   test("GET:200 responds with an array of article objects", () => {

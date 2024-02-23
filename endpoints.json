@@ -179,5 +179,11 @@
         "description": "newDescription"
       }
     }
+  },
+  "DELETE /api/articles/:article_id": {
+    "description": "deletes the specified article",
+    "queries": [],
+    "reqBodyFormat": "object",
+    "exampleResponse": null
   }
 }

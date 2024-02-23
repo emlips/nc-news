@@ -10,7 +10,6 @@ Link to hosted version: https://nc-news-1d1v.onrender.com
 >* `Node.js:` v21.1.0
 >* `Postgres (PostgreSQL):` 14.9
 >
-><br>
 
 ### Navigation:
 1. [Getting started](#1-getting-started)
@@ -35,44 +34,9 @@ $ cd nc-news
 
 ## 2. Installing the dependencies:
 
-Use the `npm init` command to create a `package.json` file for the application:
+Use the `npm install` command to install the dependencies in the `package.json` file:
 ```
-$ npm init
-```
-
-Use the following commands to install the required dependencies for the application:
-
-* To install [husky:](https://www.npmjs.com/package/husky)
-```
-$ npm install husky
-```
-* To install [dotenv:](https://www.npmjs.com/package/dotenv)
-```
-$ npm install dotenv --save
-```
-* To install [express:](https://www.npmjs.com/package/express)
-```
-$ npm install express
-```
-* To install [node-postgress:](https://www.npmjs.com/package/pg)
-```
-$ npm install pg
-```
-* To install [node-pg-format:](https://www.npmjs.com/package/pg-format)
-```
-$ npm install pg-format
-```
-* To install [jest:](https://www.npmjs.com/package/jest)
-```
-$ npm i -D jest
-```
-* To install [jest-sorted:](https://www.npmjs.com/package/jest-sorted)
-```
-$ npm i -D jest-sorted
-```
-* To install [supertest](https://www.npmjs.com/package/supertest)
-```
-$ npm i -D supertest
+$ npm install
 ```
 
 ## 3. Connecting to the required databases locally:

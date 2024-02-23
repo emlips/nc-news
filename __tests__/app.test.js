@@ -48,7 +48,7 @@ describe("GET /api/articles", () => {
       .expect(200)
       .then(({ body }) => {
         const { articles } = body;
-        expect(articles.length).toBe(13);
+        expect(articles.length).toBe(10);
         articles.forEach((article) => {
           expect(typeof article.author).toBe("string");
           expect(typeof article.title).toBe("string");
@@ -70,7 +70,7 @@ describe("GET /api/articles", () => {
       .expect(200)
       .then(({ body }) => {
         const { articles } = body;
-        expect(articles.length).toBe(13);
+        expect(articles.length).toBe(10);
         expect(articles).toBeSortedBy("created_at", { descending: true });
       });
   });
@@ -90,7 +90,7 @@ describe("GET /api/articles", () => {
   });
   test("GET:200 takes a topic query that returns only the articles on the given topic", () => {
     return request(app)
-      .get("/api/articles?topic=mitch")
+      .get("/api/articles?topic=mitch&limit=13")
       .expect(200)
       .then(({ body }) => {
         const { articles } = body;
@@ -109,22 +109,86 @@ describe("GET /api/articles", () => {
         expect(articles).toEqual([]);
       });
   });
-  test("GET:404 returns an error when a valid but non-existent topic is received in the query", () => {
-    return request(app)
-      .get("/api/articles?topic=dogs")
-      .expect(404)
-      .then(({ body }) => {
-        expect(body.msg).toBe("topic not found");
-      });
-  });
   test("GET:200 responds with articles sorted by the given column when a sort_by query is received, with default order descending", () => {
     return request(app)
       .get("/api/articles?sort_by=title")
       .expect(200)
       .then(({ body }) => {
         const { articles } = body;
-        expect(articles.length).toBe(13);
+        expect(articles.length).toBe(10);
         expect(articles).toBeSortedBy("title", { descending: true });
+      });
+  });
+  test("GET:200 responds with articles sorted in ascending order of the given sort_by value, when an order=asc query is chained", () => {
+    return request(app)
+      .get("/api/articles?sort_by=title&order=asc")
+      .expect(200)
+      .then(({ body }) => {
+        const { articles } = body;
+        expect(articles.length).toBe(10);
+        expect(articles).toBeSortedBy("title");
+      });
+  });
+  test("GET:200 responds with the number of articles requested by the limit query", () => {
+    return request(app)
+      .get("/api/articles?limit=5")
+      .expect(200)
+      .then(({ body }) => {
+        const { articles } = body;
+        expect(articles.length).toBe(5);
+      });
+  });
+  test("GET:200 responds with 10 articles as default when no limit query received", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body }) => {
+        const { articles } = body;
+        expect(articles.length).toBe(10);
+      });
+  });
+  test("GET:200 responds with a total_count property of 10 when no query is received", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.total_count).toBe(10);
+      });
+  });
+  test("GET:200 responds with a total_count property of actual articles received, even where total_count is lower than the limit", () => {
+    return request(app)
+      .get("/api/articles?topic=cats&limit=8")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.total_count).toBe(1);
+      });
+  });
+  test("GET:200 responds with the specified page requested in the query", () => {
+    return request(app)
+      .get("/api/articles?sort_by=article_id&order=asc&limit=2&p=4")
+      .expect(200)
+      .then(({ body }) => {
+        const { articles } = body;
+        expect(articles[0].article_id).toBe(7);
+        expect(articles[1].article_id).toBe(8);
+      });
+  });
+  test("GET:200 responds with empty array when specified page requested in the query is beyond the retrieval of results", () => {
+    return request(app)
+      .get("/api/articles?limit=20&p=4")
+      .expect(200)
+      .then(({ body }) => {
+        const { articles, total_count } = body;
+        expect(articles).toEqual([]);
+        expect(total_count).toBe(0);
+      });
+  });
+  test("GET:404 returns an error when a valid but non-existent topic is received in the query", () => {
+    return request(app)
+      .get("/api/articles?topic=dogs")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("topic not found");
       });
   });
   test("GET:400 returns an error when a non-existent sort_by value is received", () => {
@@ -143,19 +207,41 @@ describe("GET /api/articles", () => {
         expect(body.msg).toBe("bad request");
       });
   });
-  test("GET:200 responds with articles sorted in ascending order of the given sort_by value, when an order=asc query is chained", () => {
-    return request(app)
-      .get("/api/articles?sort_by=title&order=asc")
-      .expect(200)
-      .then(({ body }) => {
-        const { articles } = body;
-        expect(articles.length).toBe(13);
-        expect(articles).toBeSortedBy("title");
-      });
-  });
   test("GET:400 returns an error when the given order value is not asc or desc", () => {
     return request(app)
       .get("/api/articles?sort_by=title&order=notAsc")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("bad request");
+      });
+  });
+  test("GET:400 returns an error when an invalid limit query value is received", () => {
+    return request(app)
+      .get("/api/articles?limit=notANumber")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("bad request");
+      });
+  });
+  test("GET:400 returns an error when limit is not strictly a number to avoid SQL injection", () => {
+    return request(app)
+      .get("/api/articles?limit=5;")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("bad request");
+      });
+  });
+  test("GET:400 returns an error when an invalid p query value is received", () => {
+    return request(app)
+      .get("/api/articles?p=notANumber")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("bad request");
+      });
+  });
+  test("GET:400 returns an error when p is not strictly a number to avoid SQL injection", () => {
+    return request(app)
+      .get("/api/articles?p=2;")
       .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("bad request");

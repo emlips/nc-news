@@ -17,7 +17,7 @@
   },
   "GET /api/articles": {
     "description": "serves an array of all articles",
-    "queries": ["author", "topic", "sort_by", "order"],
+    "queries": ["author", "topic", "sort_by", "order", "limit", "p"],
     "reqBodyFormat": "object",
     "exampleResponse": {
       "articles": [
@@ -30,7 +30,8 @@
           "votes": 0,
           "comment_count": 6
         }
-      ]
+      ],
+      "total_count": 1
     }
   },
   "POST /api/articles": {

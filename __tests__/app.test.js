@@ -40,6 +40,48 @@ describe("GET /api/topics", () => {
       });
   });
 });
+describe("POST /api/topics", () => {
+  test("POST:201 responds with newly post topic object", () => {
+    const newTopic = {
+      slug: "newTopic",
+      description: "newDescription",
+    };
+    return request(app)
+      .post("/api/topics")
+      .send(newTopic)
+      .expect(201)
+      .then(({ body }) => {
+        const { topic } = body;
+        expect(topic).toMatchObject(newTopic);
+      });
+  });
+  test("POST:201 accepts request body without description property", () => {
+    const newTopic = {
+      slug: "newTopic",
+    };
+    return request(app)
+      .post("/api/topics")
+      .send(newTopic)
+      .expect(201)
+      .then(({ body }) => {
+        const { topic } = body;
+        expect(topic.slug).toBe("newTopic");
+        expect(topic.description).toBe(null);
+      });
+  });
+  test("POST:400 returns an error when body is malformed/missing required slug field", () => {
+    const newTopic = {
+      description: "newDescription",
+    };
+    return request(app)
+      .post("/api/topics")
+      .send(newTopic)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("bad request");
+      });
+  });
+});
 
 describe("GET /api/articles", () => {
   test("GET:200 responds with an array of article objects", () => {
@@ -248,7 +290,6 @@ describe("GET /api/articles", () => {
       });
   });
 });
-
 describe("POST /api/articles", () => {
   test("POST:201 responds with newly posted article", () => {
     const newArticle = {
@@ -340,7 +381,6 @@ describe("POST /api/articles", () => {
       });
   });
 });
-
 describe("GET /api/articles/:article_id", () => {
   test("GET:200 responds with an article object relating to the correct article_id", () => {
     return request(app)
@@ -398,7 +438,69 @@ describe("GET /api/articles/:article_id", () => {
       });
   });
 });
-
+describe("PATCH /api/articles/:article_id", () => {
+  test("PATCH:200 responds with the updated article", () => {
+    const update = { inc_votes: 10 };
+    return request(app)
+      .patch("/api/articles/1")
+      .send(update)
+      .expect(200)
+      .then(({ body }) => {
+        const { article } = body;
+        expect(article.votes).toBe(110);
+      });
+  });
+  test("PATCH:200 responds negative vote count when the update results in negative votes", () => {
+    const update = { inc_votes: -1 };
+    return request(app)
+      .patch("/api/articles/2")
+      .send(update)
+      .expect(200)
+      .then(({ body }) => {
+        const { article } = body;
+        expect(article.votes).toBe(-1);
+      });
+  });
+  test("PATCH:400 returns an error when body is malformed/missing required fields", () => {
+    return request(app)
+      .patch("/api/articles/1")
+      .send({})
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("bad request");
+      });
+  });
+  test("PATCH:400 returns an error when inc_votes is of invalid type", () => {
+    const update = { inc_votes: "a string" };
+    return request(app)
+      .patch("/api/articles/1")
+      .send(update)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("bad request");
+      });
+  });
+  test("PATCH:404 returns an error when request body is valid, but a valid but non-existent article_id is received", () => {
+    const update = { inc_votes: 1 };
+    return request(app)
+      .patch("/api/articles/99999")
+      .send(update)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("article does not exist");
+      });
+  });
+  test("PATCH:400 returns an error when request body is valid, but an invalid article_id is received", () => {
+    const update = { inc_votes: 1 };
+    return request(app)
+      .patch("/api/articles/notAnId")
+      .send(update)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("bad request");
+      });
+  });
+});
 describe("GET /api/articles/:article_id/comments", () => {
   test("GET:200 responds with an array of comments relating to the given article_id", () => {
     return request(app)
@@ -523,7 +625,6 @@ describe("GET /api/articles/:article_id/comments", () => {
       });
   });
 });
-
 describe("POST /api/articles/:article_id/comments", () => {
   test("POST:201 responds with the posted comment", () => {
     const newPost = {
@@ -592,70 +693,6 @@ describe("POST /api/articles/:article_id/comments", () => {
   });
 });
 
-describe("PATCH /api/articles/:article_id", () => {
-  test("PATCH:200 responds with the updated article", () => {
-    const update = { inc_votes: 10 };
-    return request(app)
-      .patch("/api/articles/1")
-      .send(update)
-      .expect(200)
-      .then(({ body }) => {
-        const { article } = body;
-        expect(article.votes).toBe(110);
-      });
-  });
-  test("PATCH:200 responds negative vote count when the update results in negative votes", () => {
-    const update = { inc_votes: -1 };
-    return request(app)
-      .patch("/api/articles/2")
-      .send(update)
-      .expect(200)
-      .then(({ body }) => {
-        const { article } = body;
-        expect(article.votes).toBe(-1);
-      });
-  });
-  test("PATCH:400 returns an error when body is malformed/missing required fields", () => {
-    return request(app)
-      .patch("/api/articles/1")
-      .send({})
-      .expect(400)
-      .then(({ body }) => {
-        expect(body.msg).toBe("bad request");
-      });
-  });
-  test("PATCH:400 returns an error when inc_votes is of invalid type", () => {
-    const update = { inc_votes: "a string" };
-    return request(app)
-      .patch("/api/articles/1")
-      .send(update)
-      .expect(400)
-      .then(({ body }) => {
-        expect(body.msg).toBe("bad request");
-      });
-  });
-  test("PATCH:404 returns an error when request body is valid, but a valid but non-existent article_id is received", () => {
-    const update = { inc_votes: 1 };
-    return request(app)
-      .patch("/api/articles/99999")
-      .send(update)
-      .expect(404)
-      .then(({ body }) => {
-        expect(body.msg).toBe("article does not exist");
-      });
-  });
-  test("PATCH:400 returns an error when request body is valid, but an invalid article_id is received", () => {
-    const update = { inc_votes: 1 };
-    return request(app)
-      .patch("/api/articles/notAnId")
-      .send(update)
-      .expect(400)
-      .then(({ body }) => {
-        expect(body.msg).toBe("bad request");
-      });
-  });
-});
-
 describe("DELETE /api/comments/:comment_id", () => {
   test("DELETE:204 deletes the specified comment and responds with no body", () => {
     return request(app).delete("/api/comments/2").expect(204);
@@ -677,7 +714,6 @@ describe("DELETE /api/comments/:comment_id", () => {
       });
   });
 });
-
 describe("PATCH /api/comments/:comment_id", () => {
   test("PATCH:200 responds with the updated comment", () => {
     return request(app)
@@ -755,7 +791,6 @@ describe("GET /api/users", () => {
       });
   });
 });
-
 describe("GET /api/users/:username", () => {
   test("GET:200 responds with a user object relating to the correct username", () => {
     return request(app)

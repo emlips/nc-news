@@ -12,12 +12,7 @@ exports.selectArticles = (
   const validSortBy = ["article_id", "title", "author", "created_at", "votes"];
   const validOrder = ["asc", "desc"];
 
-  if (
-    !validSortBy.includes(sort_by) ||
-    !validOrder.includes(order) ||
-    !Number(limit) ||
-    !Number(p)
-  ) {
+  if (!validSortBy.includes(sort_by) || !validOrder.includes(order)) {
     return Promise.reject({
       status: 400,
       msg: "bad request",
@@ -29,9 +24,11 @@ exports.selectArticles = (
     queryValues.push(topic);
   }
 
-  articlesQuery += ` GROUP BY articles.article_id ORDER BY ${sort_by} ${order} LIMIT ${limit} OFFSET ${
-    (p - 1) * limit
-  }`;
+  articlesQuery += ` GROUP BY articles.article_id ORDER BY ${sort_by} ${order} LIMIT $${
+    queryValues.length + 1
+  } OFFSET $${queryValues.length + 2}`;
+
+  queryValues.push(limit, (p - 1) * limit);
 
   const articles = db.query(articlesQuery, queryValues);
   const topicCheck = db.query(`SELECT slug FROM topics WHERE slug = $1`, [

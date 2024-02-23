@@ -1,12 +1,23 @@
 const db = require("../db/connection");
 
-exports.selectArticles = (topic, sort_by = "created_at", order = "desc") => {
+exports.selectArticles = (
+  topic,
+  sort_by = "created_at",
+  order = "desc",
+  limit = 10,
+  p = 1
+) => {
   const queryValues = [];
   let articlesQuery = `SELECT articles.*, COUNT(comments.article_id)::INT AS comment_count FROM articles LEFT JOIN comments ON articles.article_id = comments.article_id`;
   const validSortBy = ["article_id", "title", "author", "created_at", "votes"];
   const validOrder = ["asc", "desc"];
 
-  if (!validSortBy.includes(sort_by) || !validOrder.includes(order)) {
+  if (
+    !validSortBy.includes(sort_by) ||
+    !validOrder.includes(order) ||
+    !Number(limit) ||
+    !Number(p)
+  ) {
     return Promise.reject({
       status: 400,
       msg: "bad request",
@@ -18,7 +29,9 @@ exports.selectArticles = (topic, sort_by = "created_at", order = "desc") => {
     queryValues.push(topic);
   }
 
-  articlesQuery += ` GROUP BY articles.article_id ORDER BY ${sort_by} ${order}`;
+  articlesQuery += ` GROUP BY articles.article_id ORDER BY ${sort_by} ${order} LIMIT ${limit} OFFSET ${
+    (p - 1) * limit
+  }`;
 
   const articles = db.query(articlesQuery, queryValues);
   const topicCheck = db.query(`SELECT slug FROM topics WHERE slug = $1`, [

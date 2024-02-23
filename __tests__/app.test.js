@@ -501,6 +501,28 @@ describe("PATCH /api/articles/:article_id", () => {
       });
   });
 });
+describe("DELETE /api/articles/:article_id", () => {
+  test("DELETE:204 deletes the specified article and responds with no body", () => {
+    return request(app).delete("/api/articles/6").expect(204);
+  });
+  test("DELETE:404 returns an error when a valid but non existent article_id is received", () => {
+    return request(app)
+    .delete("/api/articles/999999")
+    .expect(404)
+    .then(({body}) => {
+      expect(body.msg).toBe("article does not exist")
+    })
+  })
+  test("DELETE:400 returns an error when an invalid article_id is received", () => {
+    return request(app)
+    .delete("/api/articles/notAnId")
+    .expect(400)
+    .then(({body}) => {
+      expect(body.msg).toBe("bad request")
+    })
+  })
+});
+
 describe("GET /api/articles/:article_id/comments", () => {
   test("GET:200 responds with an array of comments relating to the given article_id", () => {
     return request(app)

@@ -106,11 +106,11 @@ exports.updateArticleById = (id, voteChange) => {
     });
 };
 
-exports.selectCommentsByArticleId = (id) => {
+exports.selectCommentsByArticleId = (id, limit = 10, p = 1) => {
   return db
     .query(
-      `SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at ASC`,
-      [id]
+      `SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at ASC LIMIT $2 OFFSET $3`,
+      [id, limit, (p - 1) * limit]
     )
     .then(({ rows }) => {
       return rows;

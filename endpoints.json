@@ -165,5 +165,19 @@
         "created_at": "2020-10-31T03:03:00.000Z"
       }
     }
+  },
+  "POST /api/topics": {
+    "description": "serves the newly posted topic",
+    "queries": [],
+    "reqBodyFormat": {
+      "slug": "newTopic",
+      "description": "newDescription"
+    },
+    "exampleResponse": {
+      "topic": {
+        "slug": "newTopic",
+        "description": "newDescription"
+      }
+    }
   }
 }

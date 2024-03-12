@@ -548,7 +548,7 @@ describe("GET /api/articles/:article_id/comments", () => {
       .then(({ body }) => {
         const { comments } = body;
         expect(comments.length).toBe(11);
-        expect(comments).toBeSortedBy("created_at");
+        expect(comments).toBeSortedBy("created_at", { descending: true });
       });
   });
   test("GET:200 responds with an empty array where the given article_id exists but has no associated comments", () => {
@@ -585,7 +585,7 @@ describe("GET /api/articles/:article_id/comments", () => {
       .then(({ body }) => {
         const { comments } = body;
         expect(comments.length).toBe(2);
-        expect(comments[0].comment_id).toBe(6);
+        expect(comments[0].comment_id).toBe(7);
         expect(comments[1].comment_id).toBe(8);
       });
   });

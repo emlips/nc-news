@@ -128,6 +128,6 @@ exports.insertCommentByArticleId = (id, username, body) => {
       [body, id, username]
     )
     .then(({ rows }) => {
-      return rows[0].body;
+      return rows[0];
     });
 };

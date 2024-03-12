@@ -647,23 +647,19 @@ describe("GET /api/articles/:article_id/comments", () => {
       });
   });
 });
-describe.only("POST /api/articles/:article_id/comments", () => {
+describe("POST /api/articles/:article_id/comments", () => {
   test("POST:201 responds with the posted comment", () => {
     const newPost = {
-      username: "Emily",
-      body: "Mauris euismod tempor dolor vitae vulputate. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.",
+      username: "rogersop",
+      body: "new comment posted"
     };
     return request(app)
       .post("/api/articles/5/comments")
       .send(newPost)
       .expect(201)
       .then(({ body }) => {
-        console.log(body)
         const { newComment } = body;
-        expect(newComment).toBe("Mauris euismod tempor dolor vitae vulputate. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos.");
-      })
-      .catch((err) => {
-        console.log(err)
+        expect(newComment).toBe("new comment posted");
       })
   });
   test("POST:400 returns an error when body is malformed/missing required fields", () => {
